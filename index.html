@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flood Warning System</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="bg"></div>
+
+  <main class="container">
+    <header class="header">
+      <h1>Flood Warning System</h1>
+    </header>
+
+    <!-- TOP CARDS -->
+    <section class="grid">
+      <article class="card">
+        <div class="card-title">System</div>
+
+        <div class="row">
+          <span class="label">Status:</span>
+          <span id="sysStatus" class="pill pill-warn">CALIBRATING</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Camera Cal:</span>
+          <span id="camStatus" class="pill pill-bad">CONNECTION LOST</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Alert:</span>
+          <span id="alertStatus" class="pill pill-ok">OFF</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Visual Confirmed:</span>
+          <span id="visualConfirmed" class="pill pill-ok">NO</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Open:</span>
+          <a class="link-pill" href="#" onclick="return false;">http://flooddetect.local/</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title">Ultrasonic</div>
+
+        <div class="row">
+          <span class="label">Distance (cm):</span>
+          <span id="distVal" class="value">-</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Delta (cm):</span>
+          <span id="deltaVal" class="value">-</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Rising Indicator:</span>
+          <span id="risingPill" class="pill pill-ok">steady</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title">DHT11</div>
+
+        <div class="row">
+          <span class="label">Humidity:</span>
+          <span id="humVal" class="value">--</span>
+          <span id="humTrend" class="pill pill-warn">flat</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Temp:</span>
+          <span id="tempVal" class="value">--</span>
+          <span id="tempTrend" class="pill pill-warn">flat</span>
+        </div>
+
+        <div class="row">
+          <span class="label">DHT OK:</span>
+          <span id="dhtOk" class="pill pill-ok">OK</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title">Visual Flags</div>
+
+        <div class="row">
+          <span class="label">Area Increase:</span>
+          <span id="areaFlag" class="pill pill-ok">NO</span>
+        </div>
+
+        <div class="row">
+          <span class="label">Line Detected:</span>
+          <span id="lineFlag" class="pill pill-ok">NO</span>
+        </div>
+
+        <div class="note">
+          Note: stream auto-starts on alert (disabled in this demo).
+        </div>
+      </article>
+    </section>
+
+    <!-- STREAM -->
+    <section class="card stream-card">
+      <div class="card-title">Live Stream</div>
+
+      <div class="stream-controls">
+        <button id="btnStart" class="btn">Start Stream</button>
+        <button id="btnStop" class="btn btn-ghost">Stop Stream</button>
+        <span id="streamHint" class="pill pill-warn">Waiting for alert…</span>
+      </div>
+
+      <div class="stream-placeholder">
+        <div class="placeholder-text">
+          Stream area (disabled). Use buttons to test camera connection.
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="card section-card">
+      <div class="card-title">How Flood Detection Works</div>
+      <p class="para">
+        This dashboard represents a flood warning workflow that combines level sensing (ultrasonic),
+        environmental context (temperature/humidity), and visual verification (camera). In a real deployment,
+        the system calibrates a baseline after boot, then monitors for meaningful deviation indicating rising
+        water levels. Visual verification helps reduce false alarms by confirming changes in the scene.
+      </p>
+
+      <div class="diagram-grid">
+        <!-- Diagram 1: Architecture -->
+        <div class="diagram">
+          <div class="diagram-title">System Architecture</div>
+          <svg viewBox="0 0 980 220" role="img" aria-label="System architecture diagram">
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L10,3 L0,6 Z"></path>
+              </marker>
+            </defs>
+
+            <!-- Left nodes -->
+            <rect class="box" x="20" y="20" width="180" height="56" rx="10"></rect>
+            <text class="txt" x="110" y="54" text-anchor="middle">HC-SR04</text>
+
+            <rect class="box" x="20" y="92" width="180" height="56" rx="10"></rect>
+            <text class="txt" x="110" y="126" text-anchor="middle">DHT11</text>
+
+            <rect class="box" x="20" y="164" width="180" height="56" rx="10"></rect>
+            <text class="txt" x="110" y="198" text-anchor="middle">Buzzer + LED</text>
+
+            <!-- Arduino -->
+            <rect class="box2" x="260" y="70" width="220" height="90" rx="14"></rect>
+            <text class="txt" x="370" y="110" text-anchor="middle">Arduino Uno</text>
+            <text class="sub" x="370" y="135" text-anchor="middle">(edge logic)</text>
+
+            <!-- ESP -->
+            <rect class="box2" x="560" y="60" width="240" height="110" rx="14"></rect>
+            <text class="txt" x="680" y="105" text-anchor="middle">ESP32-CAM</text>
+            <text class="sub" x="680" y="130" text-anchor="middle">(Wi-Fi UI + vision)</text>
+
+            <!-- Browser -->
+            <rect class="box" x="840" y="78" width="120" height="72" rx="12"></rect>
+            <text class="txt" x="900" y="112" text-anchor="middle">Phone/PC</text>
+            <text class="sub" x="900" y="134" text-anchor="middle">Browser</text>
+
+            <!-- Arrows -->
+            <line class="ln" x1="200" y1="48" x2="260" y2="96" marker-end="url(#arrow)"></line>
+            <line class="ln" x1="200" y1="120" x2="260" y2="115" marker-end="url(#arrow)"></line>
+            <line class="ln" x1="200" y1="192" x2="260" y2="134" marker-end="url(#arrow)"></line>
+
+            <line class="ln" x1="480" y1="115" x2="560" y2="115" marker-end="url(#arrow)"></line>
+            <text class="sub" x="520" y="98" text-anchor="middle">UART telemetry</text>
+
+            <line class="ln" x1="800" y1="115" x2="840" y2="115" marker-end="url(#arrow)"></line>
+            <text class="sub" x="820" y="98" text-anchor="middle">HTTP + mDNS</text>
+          </svg>
+        </div>
+
+        <!-- Diagram 2: Flowchart -->
+        <div class="diagram">
+          <div class="diagram-title">Decision Flow (Simplified)</div>
+          <svg viewBox="0 0 980 310" role="img" aria-label="Flood detection flowchart">
+            <defs>
+              <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L10,3 L0,6 Z"></path>
+              </marker>
+            </defs>
+
+            <rect class="box2" x="40" y="30" width="220" height="60" rx="14"></rect>
+            <text class="txt" x="150" y="65" text-anchor="middle">Boot</text>
+
+            <rect class="box2" x="40" y="120" width="220" height="70" rx="14"></rect>
+            <text class="txt" x="150" y="155" text-anchor="middle">Calibrate baseline</text>
+            <text class="sub" x="150" y="177" text-anchor="middle">(60–120 s)</text>
+
+            <rect class="box2" x="340" y="120" width="240" height="70" rx="14"></rect>
+            <text class="txt" x="460" y="155" text-anchor="middle">Monitor sensors</text>
+            <text class="sub" x="460" y="177" text-anchor="middle">(sampling loop)</text>
+
+            <polygon class="dia" points="700,120 860,155 700,190 540,155"></polygon>
+            <text class="txt" x="700" y="160" text-anchor="middle">Level change?</text>
+
+            <rect class="box" x="340" y="230" width="240" height="60" rx="14"></rect>
+            <text class="txt" x="460" y="265" text-anchor="middle">No → Continue</text>
+
+            <rect class="box-bad" x="880" y="120" width="80" height="70" rx="14"></rect>
+            <text class="txt" x="920" y="150" text-anchor="middle">Alert</text>
+            <text class="sub" x="920" y="172" text-anchor="middle">beep/LED</text>
+
+            <line class="ln" x1="150" y1="90" x2="150" y2="120" marker-end="url(#arrow2)"></line>
+            <line class="ln" x1="260" y1="155" x2="340" y2="155" marker-end="url(#arrow2)"></line>
+            <line class="ln" x1="580" y1="155" x2="540" y2="155" marker-end="url(#arrow2)"></line>
+
+            <line class="ln" x1="700" y1="190" x2="460" y2="230" marker-end="url(#arrow2)"></line>
+            <text class="sub" x="610" y="230" text-anchor="middle">NO</text>
+
+            <line class="ln" x1="860" y1="155" x2="880" y2="155" marker-end="url(#arrow2)"></line>
+            <text class="sub" x="850" y="138" text-anchor="middle">YES</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- REAL WORLD USE -->
+    <section class="card section-card">
+      <div class="card-title">Real-World Use Cases</div>
+      <p class="para">
+        Flood detection is most effective when placed at locations where water rises quickly and early warning
+        prevents damage. Typical deployments include basement sumps, underground parking ramps, utility corridors,
+        warehouse floors, near drain inlets, irrigation control rooms, and low-lying access tunnels. A combined
+        approach (level + environment + visual verification) reduces nuisance alarms caused by reflections,
+        moving objects, or temporary sensor noise.
+      </p>
+
+      <div class="mini-grid">
+        <div class="mini">
+          <div class="mini-title">Why combine sensors?</div>
+          <p class="mini-text">
+            Ultrasonic sensing provides fast level change detection. DHT trends add context (condensation / weather
+            shift). Camera verification provides operator confidence.
+          </p>
+        </div>
+
+        <div class="mini">
+          <div class="mini-title">What an operator gains</div>
+          <p class="mini-text">
+            One dashboard view: system state, environmental readings, and a clear “camera disconnected” indicator
+            if video verification is unavailable.
+          </p>
+        </div>
+
+        <div class="mini">
+          <div class="mini-title">Next improvement steps</div>
+          <p class="mini-text">
+            Add real telemetry from the ESP32-CAM/Arduino, enable MJPEG preview, and store alert snapshots or
+            notifications (e.g., webhook/MQTT).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Static demo dashboard (HTML/CSS/JS). Camera intentionally shown as disconnected.</span>
+    </footer>
+  </main>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-title" id="modalTitle">Camera Disconnected</div>
+      <p class="modal-text">
+        The ESP32-CAM is not reachable in this demo. Please check power, Wi-Fi connectivity, and the stream endpoint.
+      </p>
+      <div class="modal-actions">
+        <button class="btn" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
